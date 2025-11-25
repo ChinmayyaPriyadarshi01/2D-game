@@ -1,0 +1,116 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.*;
+
+public class Game extends JPanel implements ActionListener, KeyListener {
+   
+    private static final int WINDOW_WIDTH = 800;
+    private static final int WINDOW_HEIGHT = 600;
+    private static final int OBJECT_SIZE = 30;
+    private static final int BASKET_WIDTH = 100;
+    private static final int BASKET_HEIGHT = 20;
+
+   
+    private Timer timer;
+    private int basketX = (WINDOW_WIDTH - BASKET_WIDTH) / 2;
+    private int basketSpeed = 10;
+    private int score = 0;
+    private ArrayList<FallingObject> objects;
+
+    public Game() {
+        this.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        this.setBackground(Color.WHITE);
+        this.setFocusable(true);
+        this.addKeyListener(this);
+
+        objects = new ArrayList<>();
+        timer = new Timer(1000 / 60, this);  // 60 FPS
+        timer.start();
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+
+        g.setColor(Color.BLUE);
+        g.fillRect(basketX, WINDOW_HEIGHT - BASKET_HEIGHT - 10, BASKET_WIDTH, BASKET_HEIGHT);
+
+        
+        g.setColor(Color.RED);
+        for (FallingObject obj : objects) {
+            g.fillRect(obj.x, obj.y, OBJECT_SIZE, OBJECT_SIZE);
+        }
+
+        // Draw score
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Score: " + score, 10, 30);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        for (int i = 0; i < objects.size(); i++) {
+            FallingObject obj = objects.get(i);
+            obj.y += obj.speed;
+
+          
+            if (obj.y + OBJECT_SIZE >= WINDOW_HEIGHT - BASKET_HEIGHT - 10 && obj.x + OBJECT_SIZE >= basketX && obj.x <= basketX + BASKET_WIDTH) {
+                score++;
+                objects.remove(i);
+                i--;
+            }
+
+          
+            if (obj.y > WINDOW_HEIGHT) {
+                objects.remove(i);
+                i--;
+            }
+        }
+
+       
+        if (Math.random() < 0.02) {
+            objects.add(new FallingObject((int) (Math.random() * (WINDOW_WIDTH - OBJECT_SIZE)), 0, (int) (Math.random() * 3 + 2)));
+        }
+
+        repaint();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT && basketX > 0) {
+            basketX -= basketSpeed;
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && basketX < WINDOW_WIDTH - BASKET_WIDTH) {
+            basketX += basketSpeed;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    
+    private static class FallingObject {
+        int x, y, speed;
+
+        public FallingObject(int x, int y, int speed) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Catch the Falling Objects");
+        Game game = new Game();
+        frame.add(game);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+}
