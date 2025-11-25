@@ -68,4 +68,3 @@ Key	Action
 
 If you take an actual screenshot of the game window, place it in assets/ and link it like:
 
-![Game Screenshot](assets/screenshot.png)
